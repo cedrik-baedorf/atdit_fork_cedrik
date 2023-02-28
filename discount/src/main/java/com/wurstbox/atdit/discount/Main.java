@@ -31,8 +31,9 @@ public class Main {
         double val1 = r.getDouble( 2 ); // discount_text
         String val2 = r.getString( 3 ); // discount
 
-        result = base * val1 / 100;
-        System.out.println( "Granted " + val1 + " % " + val2 + " discount: " + result + " €" );
+        var discount = base * val1 / 100;
+        System.out.println( "Granted " + val1 + " % " + val2 + " discount: " + discount + " €" );
+        result += discount;
       }
 
       r.close();
@@ -42,10 +43,5 @@ public class Main {
     catch( Exception sql ) { }
 
     return result;
-  }
-
-  public static void main( String[] args ) {
-    Main m = new Main();
-    System.out.println( m.computeDiscount( 250, 2 ) );
   }
 }
