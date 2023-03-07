@@ -17,6 +17,9 @@ import java.util.Properties;
  */
 public class DiscountComputerImplementation implements DiscountComputer {
   private static final Logger log = LoggerFactory.getLogger( MethodHandles.lookup().lookupClass() );
+  public static final String URL = "url";
+  public static final String USER = "user";
+  public static final String PASSWORD = "password";
 
   DiscountComputerImplementation() {
   }
@@ -111,6 +114,7 @@ public class DiscountComputerImplementation implements DiscountComputer {
     String url = dbAccessProperties.getProperty( "url" );
     String user = dbAccessProperties.getProperty( "user" );
     String password = dbAccessProperties.getProperty( "password" );
+    logMissingParameters( url, user, password );
 
     try( Connection connection = getConnection( url, user, password );
         PreparedStatement statement = prepareStatement( connection, customer );
@@ -118,10 +122,22 @@ public class DiscountComputerImplementation implements DiscountComputer {
       fillResultList( result, dbQueryResult );
     }
     catch( SQLException e ) {
-      throw new RuntimeException( "database access failed" );
+      final String msg = "database access failed";
+      log.error( msg, e );
+      throw new RuntimeException( msg );
     }
 
     return result;
+  }
+
+  private void logMissingParameters( String url, String user, String password ) {
+    String msg = "database access property not maintained: {}";
+    if( url == null )
+      log.error( msg, URL );
+    if( user == null )
+      log.error( msg, USER );
+    if( password == null )
+      log.error( msg, PASSWORD );
   }
 
   private void fillResultList( List<DiscountDB> result, ResultSet dbQueryResult ) throws SQLException {
@@ -154,12 +170,15 @@ public class DiscountComputerImplementation implements DiscountComputer {
 
   private Properties getDbAccessProperties() {
     Properties dbAccessProperties;
+
     try( InputStream is = getClass().getClassLoader().getResourceAsStream( "db.properties" ) ) {
       dbAccessProperties = new Properties();
       dbAccessProperties.load( is );
     }
-    catch( IOException e ) {
-      throw new RuntimeException( "database connection properties could not be found" );
+    catch( IOException | IllegalArgumentException | NullPointerException e ) {
+      final String msg = "Loading database connection properties failed";
+      log.error( msg, e );
+      throw new RuntimeException( msg );
     }
     return dbAccessProperties;
   }
