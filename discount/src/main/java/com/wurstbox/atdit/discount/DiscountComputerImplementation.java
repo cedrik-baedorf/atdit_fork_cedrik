@@ -1,7 +1,11 @@
 package com.wurstbox.atdit.discount;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.invoke.MethodHandles;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +16,8 @@ import java.util.Properties;
  Current Implementation for discount computation (see {@link DiscountComputer}).
  */
 public class DiscountComputerImplementation implements DiscountComputer {
+  private static final Logger log = LoggerFactory.getLogger( MethodHandles.lookup().lookupClass() );
+
   DiscountComputerImplementation() {
   }
 
@@ -27,13 +33,52 @@ public class DiscountComputerImplementation implements DiscountComputer {
    */
   @Override
   public List<Discount> computeDiscount( double base, int customer ) {
+    logMethodCall( base, customer );
     List<Discount> result = new ArrayList<>();
 
-    var dbData = getDiscountsFromDB( customer );
-    convertDBDataToResult( base, result, dbData );
+    var rawData = getDiscountsFromDB( customer );
+    logDiscountRawData( rawData );
+
+    convertDBDataToResult( base, result, rawData );
+    logComputedDiscounts( result );
+
     addAggregateDiscounts( result );
+    logAggregatedDiscount( result );
 
     return result;
+  }
+
+  private void logAggregatedDiscount( List<Discount> result ) {
+    if( !log.isInfoEnabled() )
+      return;
+
+    log.info( "customer receives {}% discount or {}€",
+              result.get( 0 ).percentage(),
+              result.get( 0 ).amount() );
+  }
+
+  private void logComputedDiscounts( List<Discount> result ) {
+    if( !log.isDebugEnabled() )
+      return;
+
+    log.debug( "raw data conversion result: " );
+    result.forEach( d -> log.debug( d.toString() ) );
+  }
+
+
+  private void logDiscountRawData( List<DiscountDB> rawData ) {
+    if( !log.isDebugEnabled() )
+      return;
+
+    log.debug( "discount raw data found: " );
+    rawData.forEach( d -> log.debug( d.toString() ) );
+  }
+
+  private void logMethodCall( double base, int customer ) {
+    if( !log.isInfoEnabled() )
+      return;
+
+    log.info( "compute discount for customer {} and base price {}", customer, base );
   }
 
   private void addAggregateDiscounts( List<Discount> result ) {
@@ -68,8 +113,8 @@ public class DiscountComputerImplementation implements DiscountComputer {
     String password = dbAccessProperties.getProperty( "password" );
 
     try( Connection connection = getConnection( url, user, password );
-         PreparedStatement statement = prepareStatement( connection, customer );
-         ResultSet dbQueryResult = statement.executeQuery() ) {
+        PreparedStatement statement = prepareStatement( connection, customer );
+        ResultSet dbQueryResult = statement.executeQuery() ) {
       fillResultList( result, dbQueryResult );
     }
     catch( SQLException e ) {
