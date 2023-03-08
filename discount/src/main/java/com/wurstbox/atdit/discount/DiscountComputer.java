@@ -13,8 +13,10 @@ public interface DiscountComputer {
 
    @return The appropriate DiscountComputer
    */
+  @SuppressWarnings( "unused" )
   static DiscountComputer get() {
-    return new DiscountComputerImplementation();
+    return new DiscountComputerImplementation(
+        new DatabaseDiscountDataService() );
   }
 
   /**

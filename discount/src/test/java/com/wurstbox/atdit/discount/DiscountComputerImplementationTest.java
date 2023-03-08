@@ -20,7 +20,7 @@ public class DiscountComputerImplementationTest {
   @Test
   public void noDiscount() {
     //assemble
-    var cut = new DiscountComputerImplementation();
+    var cut = new DiscountComputerImplementation( new DatabaseDiscountDataService() );
     var expected = new ArrayList<Discount>( 1 );
     expected.add( new Discount( "Aggregate", 0, 0 ) );
 
@@ -45,7 +45,7 @@ public class DiscountComputerImplementationTest {
   @Test
   public void singleDiscount() {
     //assemble
-    var cut = new DiscountComputerImplementation();
+    var cut = new DiscountComputerImplementation( new DatabaseDiscountDataService() );
     var expected = new ArrayList<Discount>( 2 );
     expected.add( new Discount( "Aggregate", 19, 19 ) );
     expected.add( new Discount( "geschenkte Mehrwertsteuer", 19, 19 ) );
@@ -73,7 +73,7 @@ public class DiscountComputerImplementationTest {
   @Test
   public void multipleDiscounts() {
     //assemble
-    var cut = new DiscountComputerImplementation();
+    var cut = new DiscountComputerImplementation( new DatabaseDiscountDataService() );
     var expected = new ArrayList<Discount>( 4 );
     expected.add( new Discount( "Aggregate", 27, 27 ) );
     expected.add( new Discount( "Semesterstart", 5, 5 ) );
