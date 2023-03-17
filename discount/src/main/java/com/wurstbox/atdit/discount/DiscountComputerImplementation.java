@@ -13,8 +13,8 @@ import java.util.List;
  */
 public class DiscountComputerImplementation implements DiscountComputer {
   private static final String url = "jdbc:mariadb://localhost:3306/atdit";
-  private static final String user = "atdit_user";
-  private static final String password = "LaXI8i3abe1aluYoRAC3nAhIyiJ6hi";
+  private static final String user = "cedrik";
+  private static final String password = "password";
 
   DiscountComputerImplementation() {
   }
@@ -81,8 +81,12 @@ public class DiscountComputerImplementation implements DiscountComputer {
       s.close();
       c.close();
     }
-    catch( Exception sql ) { }
+    catch( Exception sql ) { System.out.println(sql.getMessage()); }
 
     return result;
+  }
+
+  public static void main(String[] args) {
+    System.out.println(new DiscountComputerImplementation().computeDiscount(100, 1));
   }
 }
